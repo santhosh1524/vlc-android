@@ -284,6 +284,8 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
 
     private var currentAudioTrack = "-2"
     private var currentSpuTrack = "-2"
+private lateinit var scaleGestureDetector: ScaleGestureDetector
+private var scaleFactor = 1.0f
 
     var isLocked = false
 
@@ -577,6 +579,16 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
         }
 
         videoLayout = findViewById(R.id.video_layout)
+        scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    override fun onScale(detector: ScaleGestureDetector): Boolean {
+        scaleFactor *= detector.scaleFactor
+        scaleFactor = scaleFactor.coerceIn(1.0f, 5.0f)
+        videoLayout.scaleX = scaleFactor
+        videoLayout.scaleY = scaleFactor
+        return true
+    }
+})
+
 
         /* Loading view */
         loadingImageView = findViewById(R.id.player_overlay_loading)
@@ -696,6 +708,10 @@ open class VideoPlayerActivity : AppCompatActivity(), PlaybackService.Callback, 
             overlayDelegate.bookmarkListDelegate?.renameBookmark(media as Bookmark, name)
         }
     }
+override fun onTouchEvent(event: MotionEvent): Boolean {
+    scaleGestureDetector.onTouchEvent(event)
+    return super.onTouchEvent(event)
+}
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
